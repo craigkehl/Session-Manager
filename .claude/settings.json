@@ -14,7 +14,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/scripts/session-startup.py"
+            "command": "python3 '/Users/craigkehl/dev/FamilySearch/AI/Session Manager/.claude/scripts/session-startup.py'"
           }
         ]
       }

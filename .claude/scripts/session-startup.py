@@ -102,12 +102,13 @@ def main():
     lines.append("")
     lines.append("Note: Invoke sessions-manager with ACTION: retrieve + HINT_TICKET once a Jira ticket is mentioned to get initiative-filtered context.")
 
-    print("\n".join(lines))
+    print(json.dumps({"systemMessage": "\n".join(lines)}))
 
 
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print(f"SESSIONS CONTEXT\n----------------\nStartup script error: {e}", file=sys.stderr)
-        sys.exit(0)  # Don't block the session on script failure
+        # Output valid JSON even on failure so the hook doesn't silently break
+        print(json.dumps({"systemMessage": f"Sessions startup error: {e}"}))
+        sys.exit(0)
