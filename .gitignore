@@ -1,0 +1,7 @@
+# Personal session data — local to each engineer's machine
+.claude/data/sessions.json
+.claude/data/feedback-log.json
+.claude/data/communication-profile.json
+
+# Claude Code local settings
+.claude/settings.local.json
