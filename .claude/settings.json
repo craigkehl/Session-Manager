@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(python3 .claude/scripts/*.py)",
+      "mcp__atlassian__getJiraIssue",
+      "mcp__atlassian__search",
+      "mcp__atlassian__searchJiraIssuesUsingJql"
+    ]
+  }
+}

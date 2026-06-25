@@ -1,0 +1,74 @@
+{
+  "frontend": [
+    {"term": "React", "frequency": 0},
+    {"term": "TypeScript", "frequency": 0},
+    {"term": "component", "frequency": 0},
+    {"term": "routing", "frequency": 0},
+    {"term": "state management", "frequency": 0},
+    {"term": "Zion UI", "frequency": 0},
+    {"term": "CSS", "frequency": 0},
+    {"term": "responsive", "frequency": 0},
+    {"term": "accessibility", "frequency": 0},
+    {"term": "i18n", "frequency": 0}
+  ],
+  "backend": [
+    {"term": "API", "frequency": 0},
+    {"term": "REST", "frequency": 0},
+    {"term": "middleware", "frequency": 0},
+    {"term": "authentication", "frequency": 0},
+    {"term": "authorization", "frequency": 0},
+    {"term": "endpoint", "frequency": 0},
+    {"term": "service", "frequency": 0},
+    {"term": "microservice", "frequency": 0},
+    {"term": "Java", "frequency": 0},
+    {"term": "Spring", "frequency": 0}
+  ],
+  "security": [
+    {"term": "token", "frequency": 0},
+    {"term": "OAuth", "frequency": 0},
+    {"term": "SSO", "frequency": 0},
+    {"term": "encryption", "frequency": 0},
+    {"term": "certificate", "frequency": 0},
+    {"term": "CORS", "frequency": 0},
+    {"term": "vulnerability", "frequency": 0},
+    {"term": "audit", "frequency": 0},
+    {"term": "permissions", "frequency": 0},
+    {"term": "session", "frequency": 0}
+  ],
+  "database": [
+    {"term": "schema", "frequency": 0},
+    {"term": "migration", "frequency": 0},
+    {"term": "index", "frequency": 0},
+    {"term": "query", "frequency": 0},
+    {"term": "DynamoDB", "frequency": 0},
+    {"term": "RDS", "frequency": 0},
+    {"term": "S3", "frequency": 0},
+    {"term": "caching", "frequency": 0},
+    {"term": "replication", "frequency": 0},
+    {"term": "Cassandra", "frequency": 0}
+  ],
+  "devops": [
+    {"term": "CI/CD", "frequency": 0},
+    {"term": "deployment", "frequency": 0},
+    {"term": "pipeline", "frequency": 0},
+    {"term": "Docker", "frequency": 0},
+    {"term": "monitoring", "frequency": 0},
+    {"term": "alerting", "frequency": 0},
+    {"term": "logging", "frequency": 0},
+    {"term": "rollback", "frequency": 0},
+    {"term": "blue-green", "frequency": 0},
+    {"term": "feature flag", "frequency": 0}
+  ],
+  "infrastructure": [
+    {"term": "AWS", "frequency": 0},
+    {"term": "CDN", "frequency": 0},
+    {"term": "load balancer", "frequency": 0},
+    {"term": "VPC", "frequency": 0},
+    {"term": "DNS", "frequency": 0},
+    {"term": "networking", "frequency": 0},
+    {"term": "scaling", "frequency": 0},
+    {"term": "IAM", "frequency": 0},
+    {"term": "CloudFormation", "frequency": 0},
+    {"term": "cost optimization", "frequency": 0}
+  ]
+}
