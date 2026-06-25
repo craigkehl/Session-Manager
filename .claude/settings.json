@@ -7,5 +7,17 @@
       "mcp__atlassian__search",
       "mcp__atlassian__searchJiraIssuesUsingJql"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/scripts/session-startup.py"
+          }
+        ]
+      }
+    ]
   }
 }
