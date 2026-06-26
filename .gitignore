@@ -9,6 +9,10 @@
 .claude/data/focus-suggestion.json
 .claude/data/injected-sessions.json
 
+# Python bytecode cache
+__pycache__/
+*.pyc
+
 # Claude Code local settings
 .claude/settings.local.json
 

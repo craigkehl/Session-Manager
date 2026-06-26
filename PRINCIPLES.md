@@ -10,13 +10,13 @@ The solution was to build a real, working tool and let the tool itself carry mul
 
 - An engineer who has only used chat sees: *a system that gives Claude memory across sessions*
 - An engineer exploring Claude Code sees: *how CLAUDE.md, settings.json, and agents fit together*
-- An engineer ready to go deeper sees: *a live demonstration of every principle worth knowing — markdown vs JSON, right-sized agents, scripts over LLMs, hooks for enforcement, cascading settings, progressive context management*
+- An engineer ready to go deeper sees: *a live demonstration of every principle worth knowing — markdown vs JSON, right-sized agents, scripts over LLMs, hooks for enforcement, cascading settings, progressive context management, just-in-time relevance retrieval*
 
 The system is genuinely useful. The principles are genuinely illustrated by it. The five-minute demo is genuinely completable. None of those things required a trade-off against the others.
 
 ---
 
-## The Six Principles
+## The Seven Principles
 
 ### 1. Markdown for instructions, JSON for data
 
@@ -58,6 +58,7 @@ The system is genuinely useful. The principles are genuinely illustrated by it. 
 - `list-repos.py` — set comprehension over JSON, sub-millisecond
 - `session-precompact.py` — structural extraction from JSONL (regex, path parsing), no LLM
 - `session-checkpoint.py` — focus detection via `Counter` on directory paths, no LLM
+- `rank_sessions.py` — the relevance engine: TF-IDF cosine + boosts, ranking past sessions against the user's prompt. The temptation is to ask an LLM "which past sessions are relevant?"; instead this is deterministic math that runs in under 10ms, never hallucinates a match, and can be unit-tested by `eval_ranking.py`
 - LLM is used for: summarizing a session (judgment), classifying a miscommunication (understanding), writing a reinforcement instruction (language)
 
 **Why it matters:** LLMs are slow, non-deterministic, and cost tokens. A script that validates an ISO 8601 timestamp runs in microseconds and never hallucinates "yes this looks fine." Use the right tool for the job. Scripts also make behavior auditable — you can read `validate-entry.py` and know exactly what passes.
@@ -69,9 +70,9 @@ The system is genuinely useful. The principles are genuinely illustrated by it. 
 **Rule:** Anything that must happen every session — context injection, compaction capture, fallback storage — should be wired into a hook, not left to CLAUDE.md instructions. Instructions can be forgotten; hooks fire regardless.
 
 **Where this appears:**
-- `SessionStart` hook → `session-startup.py` injects prior context before the first message
+- `SessionStart` hook → `session-startup.py` emits a minimal "active" message (no eager dump)
+- `UserPromptSubmit` hook → `session-context-inject.py` runs just-in-time relevance retrieval against the prompt, and reinjects recovered context after a compaction
 - `PreCompact` hook → `session-precompact.py` captures the transcript before it's shed
-- `UserPromptSubmit` hook → `session-context-inject.py` reinjects recovered context when needed
 - `Stop` hook (async) → `session-checkpoint.py` monitors focus drift after every turn
 - `SessionEnd` hook → `session-fallback.py` writes a stub if the agent never stored
 
@@ -113,19 +114,36 @@ The system is genuinely useful. The principles are genuinely illustrated by it. 
 
 ---
 
+### 7. Just-in-time relevance retrieval, not eager loading
+
+**Rule:** Surface stored knowledge when it's relevant to what's being asked — not all of it, up front, on the chance some of it matters. Match against the actual question; gate hard; stay silent when nothing fits.
+
+**Where this appears:**
+- `session-startup.py` used to dump the 5 most recent sessions at startup, before the user had said anything. It now emits a one-line "active" message.
+- `session-context-inject.py` (UserPromptSubmit) ranks past sessions against the user's actual prompt and injects only what clears the bar — at most 2, summary only.
+- `rank_sessions.py` scores by content relevance (TF-IDF) with metadata boosts, so a specific topical match beats mere recency.
+- A per-session dedup set (`injected-sessions.json`) ensures the same past session is never injected twice in one conversation — so running every turn never compounds into bloat.
+- `/recall <topic>` (`.claude/commands/recall.md`) is the explicit escape hatch: when the user *asks* for history, the gate widens (top-5, no threshold) and the full view — including decisions — is shown.
+
+**Why it matters:** Eager loading spends context on recency and hopes it's relevant. Most of it isn't, and it pushes the things that *are* relevant further from the active window. Just-in-time retrieval inverts this: zero cost on turns where nothing matches, precise injection when something does. The cost of retrieval is paid only when it delivers value. This is the same instinct as lazy evaluation — do the work when the answer is actually needed, not before.
+
+---
+
 ## Does the System Apply Its Own Principles?
 
 **Markdown vs JSON:** Yes. Every agent prompt is prose `.md`. Every data file is typed JSON. The hook output envelopes are JSON even when the content is a human-readable string.
 
 **Right-sized agents:** Yes. Both agents use Sonnet, not Opus. Tool lists are minimal. All inputs and outputs are JSON-shaped.
 
-**Scripts over LLMs:** Yes. All four hook scripts are pure Python — no LLM calls. The one place an LLM is genuinely needed (writing a session summary) is left to the agent, not attempted structurally.
+**Scripts over LLMs:** Yes. Every hook script is pure Python — no LLM calls. The relevance engine (`rank_sessions.py`) is deterministic TF-IDF, unit-tested by `eval_ranking.py`. The one place an LLM is genuinely needed (writing a session summary) is left to the agent, not attempted structurally.
 
 **Hooks over instructions:** Yes, with one honest gap. Session-end storage of a rich summary still depends on the LLM acting on CLAUDE.md instructions. The `SessionEnd` fallback mitigates but doesn't eliminate this. It is inherent to the hook system's limitation: hooks run outside the conversation and cannot read it.
 
 **Cascading:** Yes. Project-scope by default, with an explicit installer for directory and global promotion.
 
-**Progressive context management:** Yes, newly added. The four-hook system was added after recognizing that CLAUDE.md-only guidance was insufficient for long sessions.
+**Progressive context management:** Yes, newly added. The hook system was added after recognizing that CLAUDE.md-only guidance was insufficient for long sessions.
+
+**Just-in-time retrieval:** Yes. Startup no longer dumps sessions; retrieval is driven by the user's prompt, gated by a relevance threshold, and deduped per session. Calibrated by `eval_ranking.py` (100% precision@1, zero false positives on the current corpus).
 
 ---
 
@@ -139,3 +157,4 @@ Building this quickly forced prioritization. The principles above aren't abstrac
 - "Hooks over instructions" from the first time a session ended without storage because Claude got absorbed in a task
 - "Cascading" from accidentally installing a hook globally and having it fire in every personal project
 - "Progressive context management" from the exact conversation that produced this document — a session that started with a security review and ended designing turn-counting algorithms, with the original intent long gone from context
+- "Just-in-time retrieval" from realizing the startup dump was spending context on recent sessions that had nothing to do with the task at hand — while the one genuinely relevant past session sat unranked in the file
