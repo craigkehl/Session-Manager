@@ -2,7 +2,7 @@
 
 ## Origin
 
-I mentioned to my manager that our team needed better guidance on working with AI tools. He agreed — by putting me on the agenda for a 5-minute "Evolving with AI" slot at the next team meeting.
+I mentioned to my manager a need for team specific and iterative guidance on working with AI tools. He agreed — by putting me on the agenda for a 5-minute "Evolving with AI" slot at the next team meeting.
 
 That constraint shaped everything. Five minutes is not enough time to teach architecture. It is enough time to show someone one thing that is immediately useful to them. The team ranged from engineers who had barely opened Claude Code to engineers already writing agentic workflows — so a single presentation pitched at one level would leave half the room behind.
 
