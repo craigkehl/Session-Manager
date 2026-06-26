@@ -16,10 +16,6 @@ The system is genuinely useful. The principles are genuinely illustrated by it. 
 
 ---
 
-This project was built quickly as a teaching tool — to demonstrate a set of principles for working effectively with Claude Code. The system is real and useful, but every architectural decision was also chosen to illustrate a specific lesson.
-
----
-
 ## The Six Principles
 
 ### 1. Markdown for instructions, JSON for data
@@ -117,7 +113,7 @@ This project was built quickly as a teaching tool — to demonstrate a set of pr
 
 ---
 
-## Did the System Apply Its Own Principles?
+## Does the System Apply Its Own Principles?
 
 **Markdown vs JSON:** Yes. Every agent prompt is prose `.md`. Every data file is typed JSON. The hook output envelopes are JSON even when the content is a human-readable string.
 
