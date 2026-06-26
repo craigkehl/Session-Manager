@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(git *)",
-      "Bash(python3 .claude/scripts/*.py)",
+      "Bash(python3 .claude/scripts/*.py *)",
       "mcp__atlassian__getJiraIssue",
       "mcp__atlassian__search",
       "mcp__atlassian__searchJiraIssuesUsingJql"
@@ -14,7 +14,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 '/Users/craigkehl/dev/FamilySearch/AI/Session Manager/.claude/scripts/session-startup.py'"
+            "command": "python3 .claude/scripts/session-startup.py"
           }
         ]
       }

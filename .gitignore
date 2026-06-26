@@ -5,3 +5,11 @@
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Session transcript (personal/internal planning artifact)
+session_transcript.txt
+
+# Presentation build artifacts
+*.pptx
+build_pptx.py
+4-presentation_outline.md
