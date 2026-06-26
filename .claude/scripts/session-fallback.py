@@ -27,6 +27,7 @@ SESSION_STORED = DATA_DIR / ".session-stored"
 TURN_COUNTER = DATA_DIR / "turn-counter.json"
 FOCUS_SUGGESTION = DATA_DIR / "focus-suggestion.json"
 REINJECT_FLAG = DATA_DIR / "pending-reinject.flag"
+INJECTED_SESSIONS = DATA_DIR / "injected-sessions.json"
 
 
 def detect_repo() -> str:
@@ -54,7 +55,7 @@ def turn_count() -> int:
 
 def main():
     # Clean up per-session state regardless of outcome
-    for f in (TURN_COUNTER, FOCUS_SUGGESTION, REINJECT_FLAG):
+    for f in (TURN_COUNTER, FOCUS_SUGGESTION, REINJECT_FLAG, INJECTED_SESSIONS):
         f.unlink(missing_ok=True)
 
     # If the agent already stored an entry, nothing left to do

@@ -70,21 +70,30 @@ ENTRY: <JSON string matching sessions schema>
 ```
 
 Steps:
-1. **Validate the entry.** Run:
+1. **Enrich capture before storing.** These fields make the entry retrievable later by the relevance engine (`rank_sessions.py`). Construct them before validation:
+   - **`decisions`** (array): durable choices made this session, distinct from `action_items`. An action item is a to-do that goes stale once done ("benchmark caching"); a decision is a reusable conclusion ("agreed on a 24-hour sliding-window token expiry"). Decisions are the highest-value thing a future session can recall — capture them deliberately.
+   - **`files_touched`** (array): read `.claude/data/rolling-summary.json` if it exists, union the distinct `files_touched` across all its epochs, and cap at ~15. This folds in scope that was shed at compaction. If the file doesn't exist, use whatever files were central this session (or omit).
+   - **`_tokens`** (string): the precomputed normalized ranking blob. Build the document text by joining `themes + key_subjects + tags + decisions + files_touched + summary + action_items`, then run:
+     ```
+     python3 .claude/scripts/rank_sessions.py --emit-tokens '<joined document text>'
+     ```
+     Store stdout (a space-joined token string) as `_tokens`. This makes retrieval fast, deterministic, and guarantees index-time tokenization matches query-time.
+
+2. **Validate the entry.** Run:
    ```
    python3 .claude/scripts/validate-entry.py --entry-json '<entry-json>'
    ```
    If `valid` is false in the output, return `{ "stored": false, "errors": [...] }` and stop.
 
-2. **Confirm initiative resolution.** If the entry has `"mcp_unresolved": true`, skip this step. Otherwise, if `jira_tickets` is non-empty, call `mcp__atlassian__getJiraIssue` for the first ticket and verify that the stored `initiative.id` matches what MCP returns. If they differ, update `initiative.name` and `initiative.id` in the entry before storing.
+3. **Confirm initiative resolution.** If the entry has `"mcp_unresolved": true`, skip this step. Otherwise, if `jira_tickets` is non-empty, call `mcp__atlassian__getJiraIssue` for the first ticket and verify that the stored `initiative.id` matches what MCP returns. If they differ, update `initiative.name` and `initiative.id` in the entry before storing.
 
-3. **Append to sessions.json.** Read `.claude/data/sessions.json`. Append the new entry to the array. Write the updated array back to `.claude/data/sessions.json`.
+4. **Append to sessions.json.** Read `.claude/data/sessions.json`. Append the new entry to the array. Write the updated array back to `.claude/data/sessions.json`.
 
-4. **Update keyword frequencies.** Read `.claude/data/keywords-taxonomy.json`. For each value in the entry's `tags` and `themes` arrays, find matching terms in the taxonomy (case-insensitive) and increment their `frequency` by 1. Write the updated taxonomy back.
+5. **Update keyword frequencies.** Read `.claude/data/keywords-taxonomy.json`. For each value in the entry's `tags` and `themes` arrays, find matching terms in the taxonomy (case-insensitive) and increment their `frequency` by 1. Write the updated taxonomy back.
 
-5. **Write the stored marker.** Write the current ISO 8601 timestamp as plain text to `.claude/data/.session-stored`. This signals the SessionEnd hook that a real entry was captured and no fallback stub is needed.
+6. **Write the stored marker.** Write the current ISO 8601 timestamp as plain text to `.claude/data/.session-stored`. This signals the SessionEnd hook that a real entry was captured and no fallback stub is needed.
 
-6. **Return** `{ "stored": true, "entry_index": <new array length minus 1> }`.
+7. **Return** `{ "stored": true, "entry_index": <new array length minus 1> }`.
 
 ---
 
@@ -124,10 +133,14 @@ Sessions entry schema:
   "tags": ["backend", "security"],
   "summary": "One sentence, max 200 characters.",
   "action_items": ["item1", "item2"],
+  "decisions": ["durable choice made this session"],
+  "files_touched": ["path/to/file.py"],
+  "_tokens": "precomputed normalized ranking blob",
   "mcp_unresolved": true
 }
 ```
-`mcp_unresolved` is optional — only present when Atlassian MCP was unavailable during the session.
+- `mcp_unresolved` is optional — only present when Atlassian MCP was unavailable during the session.
+- `decisions`, `files_touched`, `_tokens` are optional but should be populated on store (step 1 above) — they power content-relevance retrieval. `_tokens` is derived; never hand-author it.
 
 ## Available Scripts
 

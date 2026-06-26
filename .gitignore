@@ -7,6 +7,7 @@
 .claude/data/.session-stored
 .claude/data/pending-reinject.flag
 .claude/data/focus-suggestion.json
+.claude/data/injected-sessions.json
 
 # Claude Code local settings
 .claude/settings.local.json

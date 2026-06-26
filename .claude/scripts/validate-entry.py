@@ -45,6 +45,17 @@ def validate(entry: dict) -> tuple[bool, list[str], list[str]]:
         elif not isinstance(val, list):
             errors.append(f"{field} must be an array")
 
+    # Optional array fields — if present, must be arrays
+    for field in ("decisions", "files_touched"):
+        val = entry.get(field)
+        if val is not None and not isinstance(val, list):
+            errors.append(f"{field} must be an array")
+
+    # Optional precomputed token blob — if present, must be a string
+    tokens = entry.get("_tokens")
+    if tokens is not None and not isinstance(tokens, str):
+        errors.append("_tokens must be a string")
+
     # repo required when jira_tickets is non-empty
     tickets = entry.get("jira_tickets", [])
     repo = entry.get("repo", "")
@@ -53,7 +64,8 @@ def validate(entry: dict) -> tuple[bool, list[str], list[str]]:
 
     # Warn on unknown top-level keys
     known_keys = {"timestamp", "initiative", "repo", "jira_tickets", "themes",
-                  "key_subjects", "tags", "summary", "action_items", "mcp_unresolved"}
+                  "key_subjects", "tags", "summary", "action_items", "mcp_unresolved",
+                  "decisions", "files_touched", "_tokens", "stub"}
     for key in entry:
         if key not in known_keys:
             warnings.append(f"unknown field: {key!r}")
