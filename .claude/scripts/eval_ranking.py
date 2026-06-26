@@ -21,7 +21,6 @@ Usage:
 """
 
 import json
-from pathlib import Path
 
 import rank_sessions as rs
 

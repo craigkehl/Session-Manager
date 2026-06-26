@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
 """
 Session startup script — runs via SessionStart hook.
-Outputs a SESSIONS CONTEXT block injected before the first exchange.
-At startup the initiative is unknown, so returns the 5 most recent sessions
-across all initiatives plus the active communication profile.
+
+Outputs a MINIMAL "system active" message. At startup there is no user
+prompt yet, so content-relevance retrieval cannot run — and dumping the 5
+most recent sessions here would spend context on recency, not relevance.
+That job now belongs to the UserPromptSubmit hook (session-context-inject.py),
+which surfaces past sessions relevant to the actual question once it's asked.
+
+So this script stays deliberately terse: confirm the system is active, show
+the repo and session count, point at /recall, and surface any cross-cutting
+communication guidance (which is not query-dependent).
 """
 
 import json
 import subprocess
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 DATA_DIR = Path(__file__).parent.parent / "data"
@@ -35,14 +41,6 @@ def detect_repo() -> str:
     return "unknown"
 
 
-def fmt_date(ts: str) -> str:
-    try:
-        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-        return dt.strftime("%Y-%m-%d")
-    except Exception:
-        return ts[:10] if len(ts) >= 10 else ts
-
-
 def main():
     repo = detect_repo()
 
@@ -53,35 +51,21 @@ def main():
         except Exception:
             pass
 
-    if not sessions:
-        print(f"SESSIONS CONTEXT\n----------------\nNo prior sessions found. This is the first session tracked in this project.\nCurrent repo: {repo}")
+    count = len(sessions)
+    if count == 0:
+        msg = ("Sessions manager active. No prior sessions on record yet — "
+               f"this is the first tracked session (repo: {repo}).")
+        print(json.dumps({"systemMessage": msg}))
         return
 
-    # Sort newest first, take 5 most recent
-    sorted_sessions = sorted(sessions, key=lambda s: s.get("timestamp", ""), reverse=True)
-    recent = sorted_sessions[:5]
+    lines = [
+        f"Sessions manager active — {count} prior session(s) on record (repo: {repo}).",
+        "Relevant past context will surface automatically as topics come up.",
+        "Use /recall <topic> to search session history on demand.",
+    ]
 
-    # Group by initiative for display
-    lines = ["SESSIONS CONTEXT", "----------------"]
-    lines.append(f"Current repo: {repo}")
-    lines.append(f"Total sessions on record: {len(sessions)}")
-    lines.append("")
-    lines.append("Recent sessions (most recent first):")
-
-    for entry in recent:
-        initiative = entry.get("initiative", {})
-        init_name = initiative.get("name", "unknown")
-        entry_repo = entry.get("repo", "unknown")
-        date = fmt_date(entry.get("timestamp", ""))
-        summary = entry.get("summary", "")
-        action_items = entry.get("action_items", [])
-        ai_str = ", ".join(action_items) if action_items else "none"
-
-        lines.append(f"  - {date} [{init_name} / {entry_repo}]: {summary}")
-        lines.append(f"    Action items: {ai_str}")
-
-    # Active communication guidance
-    profile_patterns = []
+    # Active communication guidance is cross-cutting (not query-dependent),
+    # so it's the one thing worth surfacing eagerly at startup.
     if PROFILE_FILE.exists():
         try:
             profile = json.loads(PROFILE_FILE.read_text())
@@ -90,17 +74,13 @@ def main():
                 for p in profile.get("patterns", [])
                 if p.get("occurrences", 0) >= 3 and p.get("reinforcement_instruction")
             ]
+            if profile_patterns:
+                lines.append("")
+                lines.append("Active communication guidance:")
+                for inst in profile_patterns:
+                    lines.append(f"  - {inst}")
         except Exception:
             pass
-
-    if profile_patterns:
-        lines.append("")
-        lines.append("Active communication guidance:")
-        for inst in profile_patterns:
-            lines.append(f"  - {inst}")
-
-    lines.append("")
-    lines.append("Note: Invoke sessions-manager with ACTION: retrieve + HINT_TICKET once a Jira ticket is mentioned to get initiative-filtered context.")
 
     print(json.dumps({"systemMessage": "\n".join(lines)}))
 
