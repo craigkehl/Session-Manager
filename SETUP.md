@@ -6,7 +6,7 @@ This guide explains how to install the `SessionStart` hook that powers automatic
 
 ## How the Hook Works
 
-When Claude Code starts a session, it runs `.claude/scripts/session-startup.py`. That script reads your local `sessions.json` and injects recent session summaries into the conversation before your first message. This requires an **absolute path** to the script because the hook runs from your project directory, not from this repo.
+When Claude Code starts a session, it runs `.claude/scripts/session-startup.py`. That script emits a brief "sessions manager active" message (it does not dump session history — relevant past context surfaces just-in-time as you ask questions, via the `UserPromptSubmit` hook). This requires an **absolute path** to the script because the hook runs from your project directory, not from this repo.
 
 The installer (`install-hook.py`) resolves the absolute path from your current machine and writes it into the correct settings file automatically.
 
@@ -102,7 +102,7 @@ It merges safely with any existing hooks or settings already in that file.
 
 ## Verifying the Install
 
-After running the installer, open Claude Code in a repo that falls under your chosen scope. The first system message should include a `SESSIONS CONTEXT` block. If you see it, the hook is working.
+After running the installer, open Claude Code in a repo that falls under your chosen scope. The first system message should include a "Sessions manager active" line. If you see it, the hook is working. (Relevant past sessions then surface automatically as you ask questions, and `/recall <topic>` searches history on demand.)
 
 If you don't see it, check:
 1. The absolute path in the settings file still points to `session-startup.py`

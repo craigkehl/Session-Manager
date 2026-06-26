@@ -104,7 +104,7 @@ The system is genuinely useful. The principles are genuinely illustrated by it. 
 **Where this appears:**
 - `PreCompact` captures a structured epoch of what's being shed into `rolling-summary.json`
 - `UserPromptSubmit` reinjects recovered epochs once, immediately after compaction
-- `Stop` (async, throttled every 5 turns) detects when 3 of 4 recent edits share a directory
+- `Stop` (async) detects when 3 of the last 4 file edits cluster under one directory subtree — but only suggests once a compaction has actually occurred (i.e. context is genuinely under pressure)
 - When focus narrows + compaction has occurred, the next prompt surfaces a `/compact` suggestion with a plain-language explanation of why Claude may seem to be ignoring earlier instructions
 - `rolling-summary.json`, `turn-counter.json`, `focus-suggestion.json` are all session-local and gitignored
 

@@ -61,10 +61,12 @@ The **directory mode** is the recommended starting point. It matches how most en
 │   ├── session-fallback.py      # SessionEnd — fallback stub + cleanup
 │   ├── rank_sessions.py         # TF-IDF relevance engine (shared tokenizer)
 │   ├── eval_ranking.py          # Dev-only: precision harness + threshold sweep
+│   ├── transcript_utils.py      # Shared JSONL transcript schema reader
 │   ├── install-hook.py          # Installs the hook into your chosen settings scope
 │   ├── query-sessions.py        # Initiative/repo filter (used by retrieve action)
 │   ├── list-repos.py            # Lists repos by initiative
-│   └── validate-entry.py        # Validates session entry schema
+│   ├── validate-entry.py        # Validates session entry schema
+│   └── tests/                   # Fixture + tests (transcript parsing, focus detection)
 ├── data/                        # gitignored — local to your machine
 │   ├── sessions.json
 │   ├── feedback-log.json
