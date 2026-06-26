@@ -2,6 +2,11 @@
 .claude/data/sessions.json
 .claude/data/feedback-log.json
 .claude/data/communication-profile.json
+.claude/data/rolling-summary.json
+.claude/data/turn-counter.json
+.claude/data/.session-stored
+.claude/data/pending-reinject.flag
+.claude/data/focus-suggestion.json
 
 # Claude Code local settings
 .claude/settings.local.json

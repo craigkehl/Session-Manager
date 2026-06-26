@@ -82,7 +82,9 @@ Steps:
 
 4. **Update keyword frequencies.** Read `.claude/data/keywords-taxonomy.json`. For each value in the entry's `tags` and `themes` arrays, find matching terms in the taxonomy (case-insensitive) and increment their `frequency` by 1. Write the updated taxonomy back.
 
-5. **Return** `{ "stored": true, "entry_index": <new array length minus 1> }`.
+5. **Write the stored marker.** Write the current ISO 8601 timestamp as plain text to `.claude/data/.session-stored`. This signals the SessionEnd hook that a real entry was captured and no fallback stub is needed.
+
+6. **Return** `{ "stored": true, "entry_index": <new array length minus 1> }`.
 
 ---
 
